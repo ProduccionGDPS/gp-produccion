@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Taller — Hoja de Rectificación → OT</title>
+<style>
+  :root{
+    --ink:#171b1f;
+    --paper:#f6f5f1;
+    --card:#ffffff;
+    --steel:#4b5a68;
+    --steel-light:#8b98a3;
+    --line:#d8d3c8;
+    --blueprint:#1c3552;
+    --blueprint-2:#274b73;
+    --amber:#e8a53d;
+    --amber-deep:#c9861f;
+    --red:#c14a36;
+    --green:#3f7d5c;
+    --violet:#5b4b8a;
+    --mono:'IBM Plex Mono', 'Courier New', monospace;
+    --display:'Barlow Condensed', 'Arial Narrow', sans-serif;
+    --body:'Inter', -apple-system, sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:var(--body);
+    background:var(--paper);
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:28px 28px;
+    color:var(--ink);
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  .wrap{max-width:1180px; margin:0 auto; padding:0 20px;}
+
+  header{background:var(--blueprint); color:#eef2f5; border-bottom:4px solid var(--amber); padding:18px 0;}
+  .head-row{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px;}
+  .brand{display:flex; align-items:baseline; gap:10px;}
+  .brand .mark{font-family:var(--mono); font-size:12px; letter-spacing:.14em; background:var(--amber); color:var(--blueprint); padding:3px 7px; font-weight:600;}
+  .brand h1{font-family:var(--display); font-weight:700; font-size:27px;}
+  .brand p{font-family:var(--mono); font-size:11px; color:#b9c6d1; letter-spacing:.06em; text-transform:uppercase;}
+
+  .session-box{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+  .session-info{font-family:var(--mono); font-size:12px; color:#dbe4ea; text-align:right;}
+  .session-info b{color:#fff; font-family:var(--display); font-size:15px; display:block; letter-spacing:.02em;}
+  .role-pill{display:inline-block; font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.06em; background:var(--amber); color:var(--blueprint); padding:2px 8px; border-radius:8px; margin-top:2px;}
+  .logout-btn{font-family:var(--display); font-size:14px; background:transparent; border:1.5px solid #5c7a95; color:#dbe4ea; padding:7px 14px; border-radius:2px; cursor:pointer;}
+  .logout-btn:hover{border-color:var(--amber); color:var(--amber);}
+
+  main{max-width:1180px; margin:0 auto; padding:26px 20px 0;}
+  .section-title{font-family:var(--display); font-size:22px; font-weight:600; display:flex; align-items:center; gap:10px; margin-bottom:14px; color:var(--blueprint);}
+  .section-title .count{font-family:var(--mono); font-size:12px; background:var(--blueprint); color:#fff; padding:2px 8px; border-radius:10px;}
+  .section-sub{font-family:var(--mono); font-size:11px; color:var(--steel-light); margin:-8px 0 16px;}
+
+  .login-wrap{max-width:440px; margin:40px auto;}
+  .login-card{background:var(--card); border:1.5px solid var(--line); padding:28px; position:relative;}
+  .login-card::before{content:''; position:absolute; top:0; left:0; right:0; height:4px; background:repeating-linear-gradient(90deg, var(--blueprint) 0 10px, transparent 10px 16px);}
+  .login-tabs{display:flex; gap:6px; margin-bottom:22px;}
+  .login-tab{flex:1; text-align:center; padding:9px 6px; font-family:var(--display); font-size:16px; border:1.5px solid var(--line); cursor:pointer; border-radius:2px; color:var(--steel);}
+  .login-tab.sel{background:var(--blueprint); color:#fff; border-color:var(--blueprint);}
+  .login-card h2{font-family:var(--display); font-size:22px; color:var(--blueprint); margin-bottom:4px;}
+  .login-card p.hint{font-family:var(--mono); font-size:11px; color:var(--steel-light); margin-bottom:18px;}
+  .login-err{color:var(--red); font-family:var(--mono); font-size:12px; margin-top:6px;}
+
+  .alert-bar{background:#fff; border:1.5px solid var(--line); border-left:5px solid var(--amber-deep); padding:12px 16px; margin-bottom:14px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; font-size:14px;}
+  .alert-bar.empty{border-left-color:var(--green);}
+  .alert-bar.urgent-mode{border-left-color:var(--red);}
+  .alert-bar b{font-family:var(--mono); text-transform:uppercase; font-size:11px; letter-spacing:.06em; color:var(--amber-deep);}
+  .alert-bar.empty b{color:var(--green);}
+  .alert-bar.urgent-mode b{color:var(--red);}
+  .alert-chip{font-family:var(--mono); font-size:11px; background:#fdf3e2; border:1px solid var(--amber); color:var(--amber-deep); padding:3px 8px; border-radius:2px;}
+  .alert-chip.overdue{background:#fbe9e5; border-color:var(--red); color:var(--red);}
+  .alert-chip.ot{background:#efeafc; border-color:var(--violet); color:var(--violet);}
+  .alert-chip.obs{background:#fbe9e5; border-color:var(--red); color:var(--red);}
+  .alert-chip.nuevo{background:#eaf3ee; border-color:var(--green); color:var(--green);}
+
+  .ticket-form{background:var(--card); border:1.5px solid var(--line); padding:22px; margin-bottom:30px; position:relative;}
+  .ticket-form::before{content:''; position:absolute; top:0; left:0; right:0; height:4px; background:repeating-linear-gradient(90deg, var(--blueprint) 0 10px, transparent 10px 16px);}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.07em; color:var(--steel); margin-bottom:5px;}
+  .field input, .field select, .field textarea{width:100%; padding:9px 10px; border:1.5px solid var(--line); background:#fcfbf9; font-family:var(--body); font-size:14px; border-radius:2px;}
+  .field input:focus, .field select:focus, .field textarea:focus{outline:2px solid var(--blueprint-2); outline-offset:1px; border-color:var(--blueprint-2);}
+  .field textarea{resize:vertical; min-height:56px;}
+  .field input[type=color]{padding:3px; height:40px; cursor:pointer;}
+  .prio-row{display:flex; gap:8px;}
+  .prio-opt{flex:1; text-align:center; padding:9px 6px; border:1.5px solid var(--line); cursor:pointer; font-family:var(--display); font-size:15px; border-radius:2px; user-select:none;}
+  .prio-opt[data-p="alta"].sel{background:var(--red); color:#fff; border-color:var(--red);}
+  .prio-opt[data-p="media"].sel{background:var(--amber); color:var(--blueprint); border-color:var(--amber);}
+  .prio-opt[data-p="baja"].sel{background:var(--green); color:#fff; border-color:var(--green);}
+  .file-drop{display:block; border:1.5px dashed var(--steel-light); padding:16px; text-align:center; cursor:pointer; font-family:var(--mono); font-size:12px; color:var(--steel); border-radius:2px; background:#fcfbf9;}
+  .file-drop.has-file{border-style:solid; border-color:var(--green); color:var(--green); background:#f2f8f4;}
+  .dest-line{display:flex; align-items:center; gap:8px; font-family:var(--mono); font-size:12px; color:var(--blueprint-2); background:#eef2f5; border:1px solid var(--line); padding:9px 12px; border-radius:2px; margin-bottom:14px;}
+  .dest-line .dot{width:8px; height:8px; border-radius:50%; background:var(--blueprint-2);}
+  .submit-btn{font-family:var(--display); font-size:16px; font-weight:700; letter-spacing:.03em; background:var(--blueprint); color:#fff; border:none; padding:11px 26px; cursor:pointer; border-radius:2px; margin-top:6px; width:100%;}
+  .submit-btn:hover{background:var(--blueprint-2);}
+  .submit-btn.wide{width:auto;}
+  .err-msg{color:var(--red); font-family:var(--mono); font-size:12px; margin-top:8px;}
+
+  .inbox{background:#fdf9f0; border:1.5px solid var(--amber); border-radius:2px; padding:18px; margin-bottom:30px;}
+  .inbox.warn{background:#fdf1ee; border-color:var(--red);}
+  .inbox-title{font-family:var(--display); font-size:20px; color:var(--amber-deep); margin-bottom:4px;}
+  .inbox.warn .inbox-title{color:var(--red);}
+  .inbox-empty{font-family:var(--mono); font-size:12px; color:var(--steel-light);}
+
+  .board{display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:16px; margin-bottom:34px;}
+  .ticket{background:var(--card); border:1.5px solid var(--line); position:relative; display:flex;}
+  .ticket .stub{width:34px; background:var(--blueprint); color:#eef2f5; display:flex; align-items:center; justify-content:center; writing-mode:vertical-rl; font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; border-right:2px dashed var(--paper);}
+  .ticket.urgent .stub{background:var(--red);}
+  .ticket.soon .stub{background:var(--amber-deep);}
+  .ticket.done .stub{background:var(--green);}
+  .ticket.waiting-ot .stub{background:var(--violet);}
+  .ticket.has-obs{border-color:var(--red);}
+  .ticket-body{padding:14px 16px; flex:1;}
+  .ticket-top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
+  .ticket-id{font-family:var(--mono); font-size:11px; color:var(--steel-light);}
+  .prio-badge{font-family:var(--mono); font-size:10px; padding:2px 7px; border-radius:8px; text-transform:uppercase; letter-spacing:.05em; font-weight:600;}
+  .prio-badge.alta{background:#fbe9e5; color:var(--red);}
+  .prio-badge.media{background:#fdf3e2; color:var(--amber-deep);}
+  .prio-badge.baja{background:#e7f2ec; color:var(--green);}
+  .ticket-body h3{font-family:var(--display); font-size:19px; margin:4px 0 2px;}
+  .ticket-body .meta{font-size:12px; font-family:var(--mono); color:var(--steel); margin-bottom:6px;}
+  .ticket-body .notas{font-size:12.5px; color:var(--steel); font-style:italic; margin-bottom:8px;}
+  .docs{display:flex; flex-direction:column; gap:5px; margin-bottom:10px;}
+  .file-link{display:inline-flex; align-items:center; gap:6px; font-family:var(--mono); font-size:11px; text-decoration:none; padding:4px 8px; border-radius:2px; width:fit-content; background:transparent; cursor:pointer;}
+  .file-link:disabled{opacity:.6; cursor:wait;}
+  .file-link.rect{color:var(--blueprint-2); border:1px solid var(--line);}
+  .file-link.ot{color:var(--violet); border:1px solid var(--violet); background:#f5f2fc;}
+  .file-missing{font-family:var(--mono); font-size:11px; color:var(--steel-light); font-style:italic;}
+  .row-fields{display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap;}
+  .row-fields select, .row-fields input[type=date]{font-family:var(--mono); font-size:12px; padding:6px 8px; border:1.5px solid var(--line); border-radius:2px; background:#fcfbf9;}
+  .estado-tag{font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.06em; padding:3px 8px; border-radius:2px;}
+  .estado-tag.pendiente_fecha{background:#f1eee6; color:var(--steel);}
+  .estado-tag.fecha_asignada{background:#efeafc; color:var(--violet);}
+  .estado-tag.ot_generada{background:#e4ecf3; color:var(--blueprint-2);}
+  .estado-tag.completado{background:#e7f2ec; color:var(--green);}
+  .due-tag{font-family:var(--mono); font-size:11px; padding:3px 8px; border-radius:2px; background:#f1eee6; color:var(--steel);}
+  .due-tag.urgent{background:#fbe9e5; color:var(--red); font-weight:600;}
+  .due-tag.soon{background:#fdf3e2; color:var(--amber-deep); font-weight:600;}
+  .action-btn{font-family:var(--mono); font-size:11px; background:var(--blueprint); color:#fff; border:none; padding:6px 10px; border-radius:2px; cursor:pointer;}
+  .action-btn.violet{background:var(--violet);}
+  .action-btn.green{background:var(--green);}
+  .action-btn.red{background:var(--red);}
+  .action-btn.ghost{background:transparent; color:var(--steel); border:1px solid var(--line);}
+
+  .obs-box{background:#fdf1ee; border:1px solid var(--red); border-radius:2px; padding:8px 10px; margin-bottom:10px; font-size:12px;}
+  .obs-box .obs-head{font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--red); margin-bottom:3px; font-weight:600;}
+  .obs-box .obs-text{color:var(--ink); margin-bottom:6px;}
+
+  .edit-form{background:#f7f6f2; border:1px dashed var(--line); padding:10px; border-radius:2px; margin-top:8px;}
+  .edit-form .field{margin-bottom:8px;}
+
+  .empty{font-family:var(--mono); font-size:13px; color:var(--steel-light); border:1.5px dashed var(--line); padding:26px; text-align:center; margin-bottom:30px;}
+  table{width:100%; border-collapse:collapse; background:var(--card); margin-bottom:30px;}
+  th, td{padding:9px 10px; border-bottom:1px solid var(--line); font-size:13px; text-align:left; vertical-align:top;}
+  th{font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--steel); background:#f1eee6;}
+  tr:hover{background:#fbfaf7;}
+  .stat-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:26px;}
+  .stat{background:var(--card); border:1.5px solid var(--line); border-top:3px solid var(--blueprint); padding:14px 16px;}
+  .stat .num{font-family:var(--display); font-size:32px; font-weight:700; color:var(--blueprint);}
+  .stat .lbl{font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--steel);}
+  .note{font-family:var(--mono); font-size:11px; color:var(--steel-light); margin:6px 0 26px; max-width:680px;}
+  .mini-upload{display:flex; align-items:center; gap:8px; margin-top:10px; flex-wrap:wrap;}
+
+  .users-panel{background:var(--card); border:1.5px solid var(--line); padding:20px; margin-bottom:30px;}
+  .user-row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); font-size:13px;}
+  .user-row:last-child{border-bottom:none;}
+  .user-row .who{font-family:var(--body); font-weight:600;}
+  .user-row .cred{font-family:var(--mono); font-size:11px; color:var(--steel-light);}
+  .user-row button{background:none; border:none; cursor:pointer; font-family:var(--mono); font-size:12px;}
+  .user-row .del-btn{color:var(--red);}
+  .user-row .edit-btn{color:var(--blueprint-2);}
+  .add-user-row{display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:8px; margin-top:14px;}
+  .add-user-row input{font-family:var(--mono); font-size:12px; padding:8px; border:1.5px solid var(--line); border-radius:2px;}
+  .add-user-row button{font-family:var(--mono); font-size:12px; background:var(--blueprint); color:#fff; border:none; padding:8px 12px; border-radius:2px; cursor:pointer;}
+  .edit-user-row{display:grid; grid-template-columns:1fr 1fr 1fr auto auto; gap:8px; flex:1;}
+  .edit-user-row input{font-family:var(--mono); font-size:12px; padding:7px; border:1.5px solid var(--blueprint-2); border-radius:2px;}
+  .edit-user-row button{font-family:var(--mono); font-size:11px; border:none; padding:7px 9px; border-radius:2px; cursor:pointer;}
+  .cred-card{background:var(--card); border:1.5px solid var(--line); padding:16px; border-radius:2px;}
+  .cred-card h4{font-family:var(--display); font-size:17px; color:var(--blueprint); margin-bottom:10px;}
+
+  @media (max-width:640px){ .grid2{grid-template-columns:1fr;} .brand h1{font-size:22px;} .add-user-row, .edit-user-row{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap head-row">
+    <div class="brand">
+      <span class="mark">OT</span>
+      <div>
+        <h1 id="systemTitle">Hoja de Rectificación → OT</h1>
+        <p>Ventas · Producción · Laudus</p>
+      </div>
+    </div>
+    <div class="session-box" id="sessionBox"></div>
+  </div>
+</header>
+
+<main id="app"></main>
+
+<script>
+const STORAGE_KEY = 'pedidos-index-v5';
+const USERS_KEY = 'usuarios-sistema-v1';
+const SETTINGS_KEY = 'app-settings-v1';
+const MAX_FILE_BYTES = 1.5*1024*1024; // 1.5 MB por archivo — valor conservador tras ver fallos de guardado a 3.5 MB
+
+let pedidos = [];
+const fileCache = {};
+let users = null;
+let appSettings = null;
+let session = null;
+let loginRole = 'ventas';
+let pendingFile = null;
+let selectedPrioridad = 'media';
+let loaded = false;
+
+let editingPedidoId = null;      // edición de datos de un pedido
+let flaggingPedidoId = null;     // escribiendo una observación
+let editingVendedorUsuario = null;
+
+const app = document.getElementById('app');
+const sessionBox = document.getElementById('sessionBox');
+
+const DEFAULT_USERS = {
+  vendedores: [ {usuario:'vendedor1', password:'1234', nombre:'Vendedor Demo'} ],
+  produccion: {usuario:'produccion', password:'1234'},
+  admin: {usuario:'admin', password:'1234'}
+};
+const DEFAULT_SETTINGS = {
+  nombreSistema: 'Hoja de Rectificación → OT',
+  colorPrimario: '#1c3552',
+  colorAcento: '#e8a53d',
+  colorFondo: '#f6f5f1'
+};
+
+function estadoLabel(e){
+  return {pendiente_fecha:'Pendiente de fecha', fecha_asignada:'Fecha asignada · falta OT', ot_generada:'OT generada', completado:'Completado'}[e] || e;
+}
+function uid(){
+  const n = (pedidos.reduce((m,p)=>{
+    const num = parseInt((p.id||'PED-0').split('-')[1]||0,10);
+    return Math.max(m,num);
+  },0)) + 1;
+  return 'PED-' + String(n).padStart(4,'0');
+}
+function daysUntil(dateStr){
+  if(!dateStr) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(dateStr+'T00:00:00');
+  return Math.round((d-today)/86400000);
+}
+function urgencyClass(p){
+  if(p.estado === 'completado') return 'done';
+  if(p.estado === 'fecha_asignada') return 'waiting-ot';
+  const d = daysUntil(p.fechaEntrega);
+  if(d===null) return '';
+  if(d<=3) return 'urgent';
+  if(d<=7) return 'soon';
+  return '';
+}
+function fmtDate(d){
+  if(!d) return '—';
+  const dt = new Date(d+'T00:00:00');
+  return dt.toLocaleDateString('es-ES', {day:'2-digit', month:'short', year:'numeric'});
+}
+function fmtDateTime(iso){
+  if(!iso) return '';
+  const dt = new Date(iso);
+  return dt.toLocaleString('es-ES', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+}
+function escapeHtml(s){ const d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
+function displayId(p){ return p.otNumero ? ('OT ' + p.otNumero) : p.id; }
+
+async function loadAll(){
+  try{ const raw = localStorage.getItem(STORAGE_KEY); pedidos = raw ? JSON.parse(raw) : []; }
+  catch(e){ pedidos = []; }
+  try{ const raw2 = localStorage.getItem(USERS_KEY); users = raw2 ? JSON.parse(raw2) : null; }
+  catch(e){ users = null; }
+  if(!users){ users = DEFAULT_USERS; await saveUsers(); }
+  try{ const raw3 = localStorage.getItem(SETTINGS_KEY); appSettings = raw3 ? JSON.parse(raw3) : null; }
+  catch(e){ appSettings = null; }
+  if(!appSettings){ appSettings = DEFAULT_SETTINGS; await saveSettings(); }
+  loaded = true;
+  applySettings();
+  render();
+}
+async function saveData(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(pedidos)); }
+  catch(e){ console.error(e); alert('No se pudo guardar. Es posible que la memoria del navegador esté llena — intenta borrar pedidos antiguos o usar archivos más livianos.'); }
+}
+async function saveUsers(){
+  try{ localStorage.setItem(USERS_KEY, JSON.stringify(users)); }
+  catch(e){ console.error(e); alert('No se pudo guardar usuarios.'); }
+}
+async function saveSettings(){
+  try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(appSettings)); }
+  catch(e){ console.error(e); alert('No se pudo guardar la configuración.'); }
+}
+function applySettings(){
+  document.documentElement.style.setProperty('--blueprint', appSettings.colorPrimario);
+  document.documentElement.style.setProperty('--amber', appSettings.colorAcento);
+  document.documentElement.style.setProperty('--paper', appSettings.colorFondo);
+  const t = document.getElementById('systemTitle');
+  if(t) t.textContent = appSettings.nombreSistema;
+  document.title = appSettings.nombreSistema;
+}
+
+function fileKey(kind, id){ return 'archivo:' + kind + ':' + id; }
+async function saveFile(kind, id, fileObj){
+  const key = fileKey(kind, id);
+  try{ localStorage.setItem(key, JSON.stringify(fileObj)); fileCache[key] = fileObj; return true; }
+  catch(e){
+    console.error(e);
+    alert('No se pudo guardar el archivo — probablemente la memoria del navegador está llena (el límite es bajo, unos pocos MB en total). Prueba con un archivo más liviano.');
+    return false;
+  }
+}
+async function loadFile(kind, id){
+  const key = fileKey(kind, id);
+  if(fileCache[key]) return fileCache[key];
+  try{ const raw = localStorage.getItem(key); if(!raw) return null; const obj = JSON.parse(raw); fileCache[key]=obj; return obj; }
+  catch(e){ return null; }
+}
+async function openFile(kind, id, btn){
+  const original = btn ? btn.textContent : null;
+  if(btn){ btn.textContent = 'Cargando...'; btn.disabled = true; }
+  const f = await loadFile(kind, id);
+  if(btn){ btn.textContent = original; btn.disabled = false; }
+  if(!f){ alert('No se pudo cargar el archivo.'); return; }
+  const a = document.createElement('a');
+  a.href = f.data; a.download = f.nombre;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+window.openFile = openFile;
+
+function renderSessionBox(){
+  if(!session){ sessionBox.innerHTML = ''; return; }
+  const roleLabel = {ventas:'Ventas', produccion:'Producción', admin:'Admin'}[session.role];
+  sessionBox.innerHTML = `
+    <div class="session-info"><b>${escapeHtml(session.nombre)}</b><span class="role-pill">${roleLabel}</span></div>
+    <button class="logout-btn" id="logoutBtn">Cerrar sesión</button>`;
+  document.getElementById('logoutBtn').addEventListener('click', ()=>{ session = null; render(); });
+}
+
+/* ---------------- LOGIN ---------------- */
+function renderLogin(){
+  sessionBox.innerHTML = '';
+  const tabs = ['ventas','produccion','admin'];
+  const labels = {ventas:'Ventas', produccion:'Producción', admin:'Admin'};
+  app.innerHTML = `
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-tabs">${tabs.map(t=>`<div class="login-tab ${t===loginRole?'sel':''}" data-role="${t}">${labels[t]}</div>`).join('')}</div>
+      <h2>Ingresar como ${labels[loginRole]}</h2>
+      <p class="hint">${loginRole==='ventas' ? 'Cada vendedor tiene su propio usuario y ve solo su cartera.' : 'Acceso único compartido para este rol.'}</p>
+      <div class="field"><label>Usuario</label><input id="login-user" autocomplete="username"></div>
+      <div class="field"><label>Contraseña</label><input id="login-pass" type="password" autocomplete="current-password"></div>
+      <div id="loginErr"></div>
+      <button class="submit-btn" id="loginBtn">Ingresar</button>
+    </div>
+  </div>`;
+  document.querySelectorAll('.login-tab').forEach(t=>t.addEventListener('click', ()=>{ loginRole = t.dataset.role; renderLogin(); }));
+  document.getElementById('loginBtn').addEventListener('click', doLogin);
+  document.getElementById('login-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+}
+function doLogin(){
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
+  const errBox = document.getElementById('loginErr');
+  errBox.innerHTML = '';
+  if(loginRole === 'ventas'){
+    const match = users.vendedores.find(v=>v.usuario===u && v.password===p);
+    if(!match){ errBox.innerHTML = `<div class="login-err">Usuario o contraseña incorrectos.</div>`; return; }
+    session = {role:'ventas', usuario:match.usuario, nombre:match.nombre};
+  } else if(loginRole === 'produccion'){
+    if(u!==users.produccion.usuario || p!==users.produccion.password){ errBox.innerHTML = `<div class="login-err">Usuario o contraseña incorrectos.</div>`; return; }
+    session = {role:'produccion', usuario:u, nombre:'Producción'};
+  } else if(loginRole === 'admin'){
+    if(u!==users.admin.usuario || p!==users.admin.password){ errBox.innerHTML = `<div class="login-err">Usuario o contraseña incorrectos.</div>`; return; }
+    session = {role:'admin', usuario:u, nombre:'Administrador'};
+  }
+  render();
+}
+
+/* ---------------- DOCS ---------------- */
+function docTags(p){
+  let html = '<div class="docs">';
+  if(p.hasRect){
+    const icon = p.rectTipo === 'application/pdf' ? '📄' : '🖼️';
+    html += `<button class="file-link rect" onclick="openFile('rect','${p.id}', this)">${icon} Hoja rectificación: ${escapeHtml(p.rectNombre)}</button>`;
+  } else { html += `<span class="file-missing">Sin hoja de rectificación</span>`; }
+  if(p.hasOt){
+    html += `<button class="file-link ot" onclick="openFile('ot','${p.id}', this)">🧾 OT Laudus: ${escapeHtml(p.otNombre)}</button>`;
+  } else if(p.estado==='fecha_asignada'){ html += `<span class="file-missing">⏳ Esperando OT de Laudus</span>`; }
+  html += '</div>';
+  return html;
+}
+
+/* ---------------- EDICIÓN Y OBSERVACIONES ---------------- */
+function startEdit(id){ editingPedidoId = id; flaggingPedidoId = null; render(); }
+function cancelEdit(){ editingPedidoId = null; render(); }
+window.startEdit = startEdit; window.cancelEdit = cancelEdit;
+async function saveEdit(id){
+  const p = pedidos.find(x=>x.id===id); if(!p) return;
+  const cliente = document.getElementById('edit-cliente-'+id).value.trim();
+  if(!cliente){ alert('El cliente no puede quedar vacío.'); return; }
+  p.cliente = cliente;
+  p.cotizacion = document.getElementById('edit-cotizacion-'+id).value.trim();
+  p.prioridad = document.getElementById('edit-prioridad-'+id).value;
+  p.notas = document.getElementById('edit-notas-'+id).value.trim();
+  await saveData();
+  editingPedidoId = null;
+  render();
+}
+window.saveEdit = saveEdit;
+
+function startFlag(id){ flaggingPedidoId = id; editingPedidoId = null; render(); }
+function cancelFlag(){ flaggingPedidoId = null; render(); }
+window.startFlag = startFlag; window.cancelFlag = cancelFlag;
+async function saveFlag(id){
+  const nota = document.getElementById('flag-nota-'+id).value.trim();
+  if(!nota){ alert('Escribe una observación.'); return; }
+  const p = pedidos.find(x=>x.id===id); if(!p) return;
+  p.correccionNota = nota; p.correccionPor = session.nombre; p.correccionFecha = new Date().toISOString();
+  await saveData();
+  flaggingPedidoId = null;
+  render();
+}
+window.saveFlag = saveFlag;
+async function resolveCorrection(id){
+  const p = pedidos.find(x=>x.id===id); if(!p) return;
+  p.correccionNota = null; p.correccionPor = null; p.correccionFecha = null;
+  await saveData(); render();
+}
+window.resolveCorrection = resolveCorrection;
+
+function editForm(p){
+  return `
+  <div class="edit-form">
+    <div class="grid2">
+      <div class="field"><label>Cliente</label><input id="edit-cliente-${p.id}" value="${escapeHtml(p.cliente)}"></div>
+      <div class="field"><label>N° cotización</label><input id="edit-cotizacion-${p.id}" value="${escapeHtml(p.cotizacion||'')}"></div>
+    </div>
+    <div class="field"><label>Prioridad</label>
+      <select id="edit-prioridad-${p.id}">
+        <option value="baja" ${p.prioridad==='baja'?'selected':''}>Baja</option>
+        <option value="media" ${p.prioridad==='media'?'selected':''}>Media</option>
+        <option value="alta" ${p.prioridad==='alta'?'selected':''}>Alta</option>
+      </select>
+    </div>
+    <div class="field"><label>Notas</label><textarea id="edit-notas-${p.id}">${escapeHtml(p.notas||'')}</textarea></div>
+    <div class="mini-upload">
+      <button class="action-btn green" onclick="saveEdit('${p.id}')">Guardar cambios</button>
+      <button class="action-btn ghost" onclick="cancelEdit()">Cancelar</button>
+    </div>
+  </div>`;
+}
+function flagForm(p){
+  return `
+  <div class="edit-form">
+    <div class="field"><label>Observación para Ventas</label><textarea id="flag-nota-${p.id}" placeholder="Ej: el nombre del cliente no coincide con la hoja adjunta..."></textarea></div>
+    <div class="mini-upload">
+      <button class="action-btn red" onclick="saveFlag('${p.id}')">Guardar observación</button>
+      <button class="action-btn ghost" onclick="cancelFlag()">Cancelar</button>
+    </div>
+  </div>`;
+}
+function obsBox(p, canResolve){
+  if(!p.correccionNota) return '';
+  return `
+  <div class="obs-box">
+    <div class="obs-head">⚠ Observación de ${escapeHtml(p.correccionPor||'')} · ${fmtDateTime(p.correccionFecha)}</div>
+    <div class="obs-text">${escapeHtml(p.correccionNota)}</div>
+    ${canResolve ? `<button class="action-btn ghost" onclick="resolveCorrection('${p.id}')">Marcar como resuelto</button>` : ''}
+  </div>`;
+}
+
+/* ---------------- TICKET CARD ---------------- */
+function ticketCard(p, opts={}){
+  const cls = urgencyClass(p) + (p.correccionNota ? ' has-obs' : '');
+  const d = daysUntil(p.fechaEntrega);
+  let dueClass = '', dueText = fmtDate(p.fechaEntrega);
+  if(p.fechaEntrega && p.estado!=='completado'){
+    if(d<0){dueClass='urgent'; dueText = `${fmtDate(p.fechaEntrega)} (vencido)`;}
+    else if(d<=3){dueClass='urgent';}
+    else if(d<=7){dueClass='soon';}
+  }
+
+  if(editingPedidoId === p.id && opts.editableFields){
+    return `<div class="ticket ${cls}" data-id="${p.id}">
+      <div class="stub">Producción</div>
+      <div class="ticket-body">
+        <div class="ticket-top"><span class="ticket-id">${displayId(p)}</span></div>
+        <h3>${escapeHtml(p.cliente)}</h3>
+        ${editForm(p)}
+      </div></div>`;
+  }
+  if(flaggingPedidoId === p.id && opts.flagCorrection){
+    return `<div class="ticket ${cls}" data-id="${p.id}">
+      <div class="stub">Producción</div>
+      <div class="ticket-body">
+        <div class="ticket-top"><span class="ticket-id">${displayId(p)}</span></div>
+        <h3>${escapeHtml(p.cliente)}</h3>
+        ${flagForm(p)}
+      </div></div>`;
+  }
+
+  let extra = '';
+  if(opts.assignDate){
+    extra += `<div class="mini-upload">
+      <input type="date" id="date-${p.id}">
+      <button class="action-btn" onclick="asignarFecha('${p.id}')">Asignar fecha</button>
+    </div>`;
+  }
+  if(opts.uploadOt){
+    extra += `<div class="mini-upload">
+      <input type="text" id="otnum-${p.id}" placeholder="N° OT Laudus (ej. 1320)" style="font-family:var(--mono); font-size:12px; padding:6px 8px; border:1.5px solid var(--violet); border-radius:2px; width:150px;">
+      <input type="file" accept=".pdf,application/pdf" id="otfile-${p.id}" style="position:absolute; width:1px; height:1px; opacity:0; overflow:hidden;" onchange="handleOtFile('${p.id}', this)">
+      <label class="action-btn violet" for="otfile-${p.id}" style="display:inline-block; cursor:pointer;">Subir OT (PDF)</label>
+    </div>`;
+  }
+  if(opts.markDone){
+    extra += `<div class="mini-upload"><button class="action-btn green" onclick="marcarCompletado('${p.id}')">Marcar completado</button></div>`;
+  }
+  if(opts.editableFields || opts.flagCorrection){
+    extra += `<div class="mini-upload">
+      ${opts.editableFields ? `<button class="action-btn ghost" onclick="startEdit('${p.id}')">✎ Editar</button>` : ''}
+      ${opts.flagCorrection ? `<button class="action-btn ghost" onclick="startFlag('${p.id}')">⚠ Observación</button>` : ''}
+    </div>`;
+  }
+
+  return `
+  <div class="ticket ${cls}" data-id="${p.id}">
+    <div class="stub">Producción</div>
+    <div class="ticket-body">
+      <div class="ticket-top">
+        <span class="ticket-id">${displayId(p)}</span>
+        <span class="prio-badge ${p.prioridad}">${p.prioridad}</span>
+      </div>
+      <h3>${escapeHtml(p.cliente)}</h3>
+      <div class="meta">Cotización: ${p.cotizacion ? escapeHtml(p.cotizacion) : '—'}${opts.showVendedor && p.vendedorNombre ? ' · Vendedor: '+escapeHtml(p.vendedorNombre) : ''}</div>
+      ${p.notas ? `<div class="notas">"${escapeHtml(p.notas)}"</div>` : ''}
+      ${obsBox(p, opts.canResolveCorrection)}
+      ${docTags(p)}
+      <div class="row-fields">
+        <span class="estado-tag ${p.estado}">${estadoLabel(p.estado)}</span>
+        <span class="due-tag ${dueClass}">📅 ${dueText}</span>
+      </div>
+      ${extra}
+    </div>
+  </div>`;
+}
+
+async function asignarFecha(id){
+  const input = document.getElementById('date-'+id);
+  if(!input.value){ alert('Selecciona una fecha primero.'); return; }
+  const p = pedidos.find(x=>x.id===id); if(!p) return;
+  p.fechaEntrega = input.value; p.estado = 'fecha_asignada';
+  await saveData(); render();
+}
+window.asignarFecha = asignarFecha;
+
+function handleOtFile(id, inputEl){
+  const f = inputEl.files[0];
+  if(!f) return;
+  const numInput = document.getElementById('otnum-'+id);
+  const otNumero = numInput ? numInput.value.trim() : '';
+  if(!otNumero){ alert('Ingresa el número de OT de Laudus antes de subir el PDF.'); return; }
+  if(f.type !== 'application/pdf'){ alert('La OT debe subirse en formato PDF.'); return; }
+  if(f.size > MAX_FILE_BYTES){ alert('El PDF supera 1.5 MB (límite del prototipo).'); return; }
+  const reader = new FileReader();
+  reader.onload = async ()=>{
+    const p = pedidos.find(x=>x.id===id); if(!p) return;
+    const fileObj = {nombre:f.name, tipo:f.type, data:reader.result};
+    const ok = await saveFile('ot', id, fileObj);
+    if(!ok) return;
+    p.otNombre = f.name; p.otTipo = f.type; p.hasOt = true; p.otNumero = otNumero; p.estado = 'ot_generada';
+    await saveData(); render();
+  };
+  reader.readAsDataURL(f);
+}
+window.handleOtFile = handleOtFile;
+
+async function marcarCompletado(id){
+  const p = pedidos.find(x=>x.id===id); if(!p) return;
+  p.estado = 'completado';
+  await saveData(); render();
+}
+window.marcarCompletado = marcarCompletado;
+
+/* ---------------- VENTAS ---------------- */
+function renderVentasForm(){
+  return `
+  <div class="ticket-form">
+    <div class="grid2">
+      <div class="field"><label>Cliente</label><input id="f-cliente" placeholder="Nombre del cliente"></div>
+      <div class="field"><label>N° de cotización</label><input id="f-cotizacion" placeholder="Ej. COT-2026-0451"></div>
+    </div>
+    <div class="field"><label>Prioridad</label>
+      <div class="prio-row" id="prio-row">
+        <div class="prio-opt" data-p="baja">Baja</div>
+        <div class="prio-opt sel" data-p="media">Media</div>
+        <div class="prio-opt" data-p="alta">Alta</div>
+      </div>
+    </div>
+    <div class="field"><label>Notas</label><textarea id="f-notas" placeholder="Indicaciones especiales para producción..."></textarea></div>
+    <div class="field">
+      <label>Hoja de rectificación (PNG o PDF)</label>
+      <label class="file-drop" id="fileDrop" for="fileInput">Haz clic para adjuntar la hoja de rectificación (máx. 1.5 MB)</label>
+      <input type="file" id="fileInput" accept=".png,.pdf,image/png,application/pdf" style="position:absolute; width:1px; height:1px; opacity:0; overflow:hidden;">
+    </div>
+    <div class="dest-line"><span class="dot"></span> Se asignará directo a Producción</div>
+    <div id="formErr"></div>
+    <button class="submit-btn wide" id="submitPedido">Asignar a producción y pedir fecha</button>
+  </div>`;
+}
+function attachVentasFormHandlers(){
+  document.querySelectorAll('.prio-opt').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      document.querySelectorAll('.prio-opt').forEach(o=>o.classList.remove('sel'));
+      el.classList.add('sel'); selectedPrioridad = el.dataset.p;
+    });
+  });
+  const fileDrop = document.getElementById('fileDrop');
+  const fileInput = document.getElementById('fileInput');
+  fileInput.addEventListener('change', ()=>{
+    const f = fileInput.files[0];
+    if(!f) return;
+    if(!['image/png','application/pdf'].includes(f.type)){ alert('Solo se aceptan archivos PNG o PDF.'); return; }
+    if(f.size > MAX_FILE_BYTES){ alert('El archivo supera 1.5 MB (límite del prototipo).'); return; }
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      pendingFile = {nombre:f.name, tipo:f.type, data:reader.result};
+      fileDrop.textContent = '✓ ' + f.name; fileDrop.classList.add('has-file');
+    };
+    reader.readAsDataURL(f);
+  });
+  document.getElementById('submitPedido').addEventListener('click', async ()=>{
+    const cliente = document.getElementById('f-cliente').value.trim();
+    const cotizacion = document.getElementById('f-cotizacion').value.trim();
+    const notas = document.getElementById('f-notas').value.trim();
+    const errBox = document.getElementById('formErr');
+    errBox.innerHTML = '';
+    if(!cliente){ errBox.innerHTML = `<div class="err-msg">Ingresa el nombre del cliente.</div>`; return; }
+    if(!pendingFile){ errBox.innerHTML = `<div class="err-msg">Adjunta la hoja de rectificación antes de enviar.</div>`; return; }
+    const submitBtn = document.getElementById('submitPedido');
+    submitBtn.disabled = true; submitBtn.textContent = 'Guardando...';
+    const id = uid();
+    const nuevo = {
+      id, cliente, cotizacion, prioridad: selectedPrioridad, notas,
+      rectNombre: pendingFile.nombre, rectTipo: pendingFile.tipo, hasRect: true,
+      otNombre: null, otTipo: null, hasOt: false, otNumero: null,
+      fechaEntrega: null, estado: 'pendiente_fecha',
+      correccionNota: null, correccionPor: null, correccionFecha: null,
+      vendedorUsuario: session.usuario, vendedorNombre: session.nombre,
+      fechaCreacion: new Date().toISOString()
+    };
+    const ok = await saveFile('rect', id, pendingFile);
+    if(!ok){ submitBtn.disabled = false; submitBtn.textContent = 'Asignar a producción y pedir fecha'; return; }
+    pedidos.unshift(nuevo);
+    await saveData();
+    pendingFile = null; selectedPrioridad = 'media';
+    render();
+  });
+}
+function alertBarVentas(misPedidos){
+  const pendientesOT = misPedidos.filter(p=>p.estado==='fecha_asignada');
+  const conObs = misPedidos.filter(p=>p.correccionNota);
+  let html = '';
+  if(conObs.length>0){
+    const chips = conObs.map(p=>`<span class="alert-chip obs">${p.id} · ${escapeHtml(p.cliente)}</span>`).join('');
+    html += `<div class="alert-bar urgent-mode"><b>${conObs.length} con observación</b> ${chips}</div>`;
+  }
+  if(pendientesOT.length===0 && conObs.length===0){
+    html += `<div class="alert-bar empty"><b>Al día</b> No tienes pedidos esperando generación de OT ni observaciones.</div>`;
+  } else if(pendientesOT.length>0){
+    const chips = pendientesOT.map(p=>`<span class="alert-chip ot">${p.id} · ${escapeHtml(p.cliente)} · entrega ${fmtDate(p.fechaEntrega)}</span>`).join('');
+    html += `<div class="alert-bar urgent-mode"><b>${pendientesOT.length} pedido(s) con fecha asignada</b> ${chips}</div>`;
+  }
+  return html;
+}
+function renderVentas(){
+  const misPedidos = pedidos.filter(p=>p.vendedorUsuario===session.usuario);
+  let html = alertBarVentas(misPedidos);
+  html += `<div class="section-title">Nueva hoja de rectificación</div>`;
+  html += renderVentasForm();
+
+  const conObs = misPedidos.filter(p=>p.correccionNota);
+  if(conObs.length){
+    html += `<div class="inbox warn">
+      <div class="inbox-title">⚠ Pedidos con observación — requieren corrección</div>
+      <div class="board" style="margin-top:12px;">${conObs.map(p=>ticketCard(p,{editableFields:true, canResolveCorrection:true})).join('')}</div>
+    </div>`;
+  }
+
+  const pendientesOT = misPedidos.filter(p=>p.estado==='fecha_asignada');
+  html += `<div class="inbox">
+    <div class="inbox-title">📥 Bandeja: tus pedidos con fecha asignada — falta subir OT de Laudus</div>
+    ${pendientesOT.length ? `<div class="board" style="margin-top:12px;">${pendientesOT.map(p=>ticketCard(p,{uploadOt:true})).join('')}</div>`
+      : `<p class="inbox-empty">No hay pedidos esperando OT en este momento.</p>`}
+  </div>`;
+
+  html += `<div class="section-title">Mi cartera de pedidos <span class="count">${misPedidos.length}</span></div>`;
+  html += misPedidos.length ? `<div class="board">${misPedidos.map(p=>ticketCard(p,{editableFields:true, canResolveCorrection:true})).join('')}</div>`
+                             : `<div class="empty">Aún no tienes pedidos. Crea el primero arriba.</div>`;
+  app.innerHTML = html;
+  attachVentasFormHandlers();
+}
+
+/* ---------------- PRODUCCIÓN ---------------- */
+function alertBarNotifs(){
+  const nuevos = pedidos.filter(p=>p.estado==='pendiente_fecha');
+  const otListas = pedidos.filter(p=>p.estado==='ot_generada');
+  if(nuevos.length===0 && otListas.length===0) return '';
+  let html = '';
+  if(nuevos.length>0){
+    const chips = nuevos.map(p=>`<span class="alert-chip nuevo">${p.id} · ${escapeHtml(p.cliente)}${p.cotizacion ? ' · COT '+escapeHtml(p.cotizacion) : ''}</span>`).join('');
+    html += `<div class="alert-bar urgent-mode"><b>🆕 ${nuevos.length} pedido(s) nuevo(s) de Ventas — falta asignar fecha</b> ${chips}</div>`;
+  }
+  if(otListas.length>0){
+    const chips = otListas.map(p=>`<span class="alert-chip ot">${p.id} · ${escapeHtml(p.cliente)} · entrega ${fmtDate(p.fechaEntrega)}</span>`).join('');
+    html += `<div class="alert-bar urgent-mode"><b>🧾 ${otListas.length} OT recién generada(s) por Ventas</b> ${chips}</div>`;
+  }
+  return html;
+}
+function alertBarProduccion(){
+  const urgent = pedidos.filter(p=>p.estado!=='completado' && daysUntil(p.fechaEntrega)!==null && daysUntil(p.fechaEntrega)<=3);
+  if(urgent.length===0) return `<div class="alert-bar empty"><b>Al día</b> No hay entregas próximas a vencer.</div>`;
+  const overdue = urgent.filter(p=>daysUntil(p.fechaEntrega)<0);
+  const chips = urgent.map(p=>{
+    const d = daysUntil(p.fechaEntrega); const cls = d<0 ? 'overdue' : '';
+    const txt = d<0 ? `${p.id} · vencido hace ${Math.abs(d)}d` : (d===0 ? `${p.id} · vence hoy` : `${p.id} · vence en ${d}d`);
+    return `<span class="alert-chip ${cls}">${txt}</span>`;
+  }).join('');
+  return `<div class="alert-bar ${overdue.length?'urgent-mode':''}"><b>${overdue.length>0? overdue.length+' vencido(s)':'Atención'}</b> ${chips}</div>`;
+}
+function renderDocumentosTable(lista){
+  const conArchivos = lista.filter(p=>p.hasRect || p.hasOt);
+  if(conArchivos.length===0) return `<div class="empty">Todavía no hay archivos subidos.</div>`;
+  let html = `<table><thead><tr>
+    <th>Pedido</th><th>Cliente</th><th>Cotización</th><th>Hoja rectificación</th><th>OT Laudus</th>
+  </tr></thead><tbody>`;
+  conArchivos.forEach(p=>{
+    html += `<tr>
+      <td>${displayId(p)}</td><td>${escapeHtml(p.cliente)}</td><td>${p.cotizacion?escapeHtml(p.cotizacion):'—'}</td>
+      <td>${p.hasRect ? `<button class="file-link rect" onclick="openFile('rect','${p.id}', this)">📄 ${escapeHtml(p.rectNombre)}</button>` : '—'}</td>
+      <td>${p.hasOt ? `<button class="file-link ot" onclick="openFile('ot','${p.id}', this)">🧾 ${escapeHtml(p.otNombre)}</button>` : '—'}</td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  return html;
+}
+function renderProduccion(){
+  let html = alertBarNotifs() + alertBarProduccion();
+  const porAsignar = pedidos.filter(p=>p.estado==='pendiente_fecha');
+  const enCurso = pedidos.filter(p=>p.estado==='fecha_asignada' || p.estado==='ot_generada');
+
+  html += `<div class="section-title">Por asignar fecha <span class="count">${porAsignar.length}</span></div>`;
+  html += `<p class="section-sub">Hojas de rectificación nuevas de Ventas. Asigna la fecha de entrega, edita datos si hace falta, o marca una observación.</p>`;
+  html += porAsignar.length ? `<div class="board">${porAsignar.map(p=>ticketCard(p,{assignDate:true, showVendedor:true, editableFields:true, flagCorrection:true, canResolveCorrection:true})).join('')}</div>`
+                             : `<div class="empty">No hay pedidos nuevos por asignar fecha.</div>`;
+
+  html += `<div class="section-title">En curso <span class="count">${enCurso.length}</span></div>`;
+  html += `<p class="section-sub">Con fecha asignada. Cuando la OT de Laudus esté cargada, puedes marcar el trabajo como completado.</p>`;
+  html += enCurso.length ? `<div class="board">${enCurso.map(p=>ticketCard(p, Object.assign({showVendedor:true, editableFields:true, flagCorrection:true, canResolveCorrection:true}, p.estado==='ot_generada' ? {markDone:true} : {}))).join('')}</div>`
+                          : `<div class="empty">No hay pedidos en curso.</div>`;
+
+  html += `<div class="section-title">📁 Documentos <span class="count">${pedidos.filter(p=>p.hasRect||p.hasOt).length}</span></div>`;
+  html += `<p class="section-sub">Todas las hojas de rectificación y OT quedan guardadas aquí — descárgalas cuando las necesites, sin importar el estado del pedido.</p>`;
+  html += renderDocumentosTable(pedidos);
+
+  app.innerHTML = html;
+}
+
+/* ---------------- ADMIN ---------------- */
+function renderAdminSettings(){
+  return `
+  <div class="section-title">Apariencia y configuración</div>
+  <div class="users-panel">
+    <div class="field"><label>Nombre del sistema</label><input id="set-nombre" value="${escapeHtml(appSettings.nombreSistema)}"></div>
+    <div class="grid2">
+      <div class="field"><label>Color primario (encabezado, acentos)</label><input type="color" id="set-primario" value="${appSettings.colorPrimario}"></div>
+      <div class="field"><label>Color de acento</label><input type="color" id="set-acento" value="${appSettings.colorAcento}"></div>
+    </div>
+    <div class="field"><label>Color de fondo</label><input type="color" id="set-fondo" value="${appSettings.colorFondo}"></div>
+    <button class="submit-btn wide" id="saveSettingsBtn">Guardar apariencia</button>
+  </div>`;
+}
+function attachAdminSettingsHandlers(){
+  const btn = document.getElementById('saveSettingsBtn');
+  if(!btn) return;
+  btn.addEventListener('click', async ()=>{
+    appSettings.nombreSistema = document.getElementById('set-nombre').value.trim() || DEFAULT_SETTINGS.nombreSistema;
+    appSettings.colorPrimario = document.getElementById('set-primario').value;
+    appSettings.colorAcento = document.getElementById('set-acento').value;
+    appSettings.colorFondo = document.getElementById('set-fondo').value;
+    await saveSettings();
+    applySettings();
+    render();
+  });
+}
+
+function renderAdminCredentials(){
+  return `
+  <div class="section-title">Accesos de Producción y Admin</div>
+  <div class="grid2" style="margin-bottom:30px;">
+    <div class="cred-card">
+      <h4>Producción</h4>
+      <div class="field"><label>Usuario</label><input id="prod-usuario" value="${escapeHtml(users.produccion.usuario)}"></div>
+      <div class="field"><label>Contraseña</label><input id="prod-password" value="${escapeHtml(users.produccion.password)}"></div>
+      <button class="action-btn" id="saveProdCred">Guardar</button>
+    </div>
+    <div class="cred-card">
+      <h4>Admin</h4>
+      <div class="field"><label>Usuario</label><input id="admin-usuario" value="${escapeHtml(users.admin.usuario)}"></div>
+      <div class="field"><label>Contraseña</label><input id="admin-password" value="${escapeHtml(users.admin.password)}"></div>
+      <button class="action-btn" id="saveAdminCred">Guardar</button>
+    </div>
+  </div>`;
+}
+function attachAdminCredHandlers(){
+  const bp = document.getElementById('saveProdCred');
+  if(bp) bp.addEventListener('click', async ()=>{
+    const u = document.getElementById('prod-usuario').value.trim();
+    const p = document.getElementById('prod-password').value.trim();
+    if(!u || !p){ alert('Completa usuario y contraseña.'); return; }
+    users.produccion = {usuario:u, password:p};
+    await saveUsers(); alert('Acceso de Producción actualizado.'); render();
+  });
+  const ba = document.getElementById('saveAdminCred');
+  if(ba) ba.addEventListener('click', async ()=>{
+    const u = document.getElementById('admin-usuario').value.trim();
+    const p = document.getElementById('admin-password').value.trim();
+    if(!u || !p){ alert('Completa usuario y contraseña.'); return; }
+    users.admin = {usuario:u, password:p};
+    await saveUsers(); alert('Acceso de Admin actualizado.'); render();
+  });
+}
+
+function renderAdminUsers(){
+  const rows = users.vendedores.map(v=>{
+    if(editingVendedorUsuario === v.usuario){
+      return `<div class="user-row">
+        <div class="edit-user-row">
+          <input id="ev-nombre" value="${escapeHtml(v.nombre)}" placeholder="Nombre">
+          <input id="ev-usuario" value="${escapeHtml(v.usuario)}" placeholder="Usuario">
+          <input id="ev-password" value="${escapeHtml(v.password)}" placeholder="Contraseña">
+          <button style="background:var(--green); color:#fff;" onclick="saveEditVendedor('${v.usuario}')">Guardar</button>
+          <button style="background:var(--steel-light); color:#fff;" onclick="cancelEditVendedor()">Cancelar</button>
+        </div>
+      </div>`;
+    }
+    return `<div class="user-row">
+      <div><div class="who">${escapeHtml(v.nombre)}</div><div class="cred">usuario: ${escapeHtml(v.usuario)} · contraseña: ${escapeHtml(v.password)}</div></div>
+      <div style="display:flex; gap:14px;">
+        <button class="edit-btn" onclick="startEditVendedor('${v.usuario}')">Editar</button>
+        <button class="del-btn" onclick="removeVendedor('${v.usuario}')">Eliminar</button>
+      </div>
+    </div>`;
+  }).join('') || '<p class="inbox-empty">No hay vendedores registrados.</p>';
+
+  return `
+  <div class="section-title">Vendedores</div>
+  <div class="users-panel">
+    ${rows}
+    <div class="add-user-row">
+      <input id="nv-nombre" placeholder="Nombre completo">
+      <input id="nv-usuario" placeholder="Usuario">
+      <input id="nv-password" placeholder="Contraseña">
+      <button id="addVendedorBtn">Agregar</button>
+    </div>
+  </div>
+  <p class="note">Prototipo: las contraseñas se guardan en texto plano y son visibles para el Admin — no uses credenciales reales sensibles. Un sistema en producción necesita contraseñas cifradas y autenticación real en el backend.</p>`;
+}
+async function removeVendedor(usuario){
+  if(pedidos.some(p=>p.vendedorUsuario===usuario)){
+    if(!confirm('Este vendedor tiene pedidos registrados. ¿Eliminar de todas formas? (sus pedidos seguirán existiendo)')) return;
+  }
+  users.vendedores = users.vendedores.filter(v=>v.usuario!==usuario);
+  await saveUsers(); render();
+}
+window.removeVendedor = removeVendedor;
+function startEditVendedor(usuario){ editingVendedorUsuario = usuario; render(); }
+function cancelEditVendedor(){ editingVendedorUsuario = null; render(); }
+window.startEditVendedor = startEditVendedor; window.cancelEditVendedor = cancelEditVendedor;
+async function saveEditVendedor(oldUsuario){
+  const nombre = document.getElementById('ev-nombre').value.trim();
+  const usuario = document.getElementById('ev-usuario').value.trim();
+  const password = document.getElementById('ev-password').value.trim();
+  if(!nombre || !usuario || !password){ alert('Completa nombre, usuario y contraseña.'); return; }
+  if(usuario !== oldUsuario && users.vendedores.some(v=>v.usuario===usuario)){ alert('Ese usuario ya existe.'); return; }
+  const v = users.vendedores.find(x=>x.usuario===oldUsuario);
+  v.nombre = nombre; v.usuario = usuario; v.password = password;
+  if(usuario !== oldUsuario){
+    pedidos.forEach(p=>{ if(p.vendedorUsuario===oldUsuario){ p.vendedorUsuario = usuario; p.vendedorNombre = nombre; } });
+    await saveData();
+  } else {
+    pedidos.forEach(p=>{ if(p.vendedorUsuario===usuario) p.vendedorNombre = nombre; });
+    await saveData();
+  }
+  await saveUsers();
+  editingVendedorUsuario = null;
+  render();
+}
+window.saveEditVendedor = saveEditVendedor;
+function attachAdminUserHandlers(){
+  const btn = document.getElementById('addVendedorBtn');
+  if(!btn) return;
+  btn.addEventListener('click', async ()=>{
+    const nombre = document.getElementById('nv-nombre').value.trim();
+    const usuario = document.getElementById('nv-usuario').value.trim();
+    const password = document.getElementById('nv-password').value.trim();
+    if(!nombre || !usuario || !password){ alert('Completa nombre, usuario y contraseña.'); return; }
+    if(users.vendedores.some(v=>v.usuario===usuario)){ alert('Ese usuario ya existe.'); return; }
+    users.vendedores.push({usuario, password, nombre});
+    await saveUsers(); render();
+  });
+}
+
+function renderAdmin(){
+  const total = pedidos.length;
+  const pendFecha = pedidos.filter(p=>p.estado==='pendiente_fecha').length;
+  const fechaAsig = pedidos.filter(p=>p.estado==='fecha_asignada').length;
+  const otGen = pedidos.filter(p=>p.estado==='ot_generada').length;
+  const completados = pedidos.filter(p=>p.estado==='completado').length;
+  const conObs = pedidos.filter(p=>p.correccionNota).length;
+
+  let html = alertBarNotifs();
+  html += `<div class="section-title">Panel general</div>`;
+  html += `<div class="stat-row">
+    <div class="stat"><div class="num">${total}</div><div class="lbl">Pedidos totales</div></div>
+    <div class="stat"><div class="num">${pendFecha}</div><div class="lbl">Pendientes de fecha</div></div>
+    <div class="stat"><div class="num">${fechaAsig}</div><div class="lbl">Esperando OT</div></div>
+    <div class="stat"><div class="num">${otGen}</div><div class="lbl">OT generada</div></div>
+    <div class="stat"><div class="num">${completados}</div><div class="lbl">Completados</div></div>
+    <div class="stat"><div class="num">${conObs}</div><div class="lbl">Con observación</div></div>
+  </div>`;
+
+  html += renderAdminSettings();
+  html += renderAdminCredentials();
+  html += renderAdminUsers();
+
+  html += `<div class="section-title">Gestión de pedidos <span class="count">${total}</span></div>`;
+  html += `<p class="section-sub">Puedes editar cualquier pedido o dejar una observación para el vendedor responsable.</p>`;
+  html += total ? `<div class="board">${pedidos.map(p=>ticketCard(p,{showVendedor:true, editableFields:true, flagCorrection:true, canResolveCorrection:true, markDone:p.estado==='ot_generada'})).join('')}</div>`
+                : `<div class="empty">No hay pedidos registrados todavía.</div>`;
+
+  html += `<div class="section-title">Tabla resumen <span class="count">${total}</span></div>`;
+  if(total===0){
+    html += `<div class="empty">No hay pedidos registrados todavía.</div>`;
+  } else {
+    html += `<table><thead><tr>
+      <th>ID</th><th>Cliente</th><th>Cotización</th><th>Vendedor</th><th>Prioridad</th><th>Entrega</th><th>Estado</th><th>Hoja rectif.</th><th>OT Laudus</th>
+    </tr></thead><tbody>`;
+    pedidos.forEach(p=>{
+      html += `<tr>
+        <td>${displayId(p)}</td><td>${escapeHtml(p.cliente)}</td><td>${escapeHtml(p.cotizacion||'—')}</td>
+        <td>${escapeHtml(p.vendedorNombre||'—')}</td>
+        <td><span class="prio-badge ${p.prioridad}">${p.prioridad}</span></td>
+        <td>${fmtDate(p.fechaEntrega)}</td>
+        <td><span class="estado-tag ${p.estado}">${estadoLabel(p.estado)}</span></td>
+        <td>${p.hasRect ? `<button class="file-link rect" onclick="openFile('rect','${p.id}', this)">↓ ver</button>` : '—'}</td>
+        <td>${p.hasOt ? `<button class="file-link ot" onclick="openFile('ot','${p.id}', this)">↓ ver</button>` : '—'}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+  }
+  app.innerHTML = html;
+  attachAdminSettingsHandlers();
+  attachAdminCredHandlers();
+  attachAdminUserHandlers();
+}
+
+/* ---------------- ROUTER ---------------- */
+function render(){
+  if(!loaded){ app.innerHTML = `<p class="note">Cargando datos...</p>`; return; }
+  renderSessionBox();
+  if(!session){ renderLogin(); return; }
+  if(session.role==='ventas') renderVentas();
+  else if(session.role==='produccion') renderProduccion();
+  else if(session.role==='admin') renderAdmin();
+}
+
+loadAll();
+</script>
+</body>
+</html>
